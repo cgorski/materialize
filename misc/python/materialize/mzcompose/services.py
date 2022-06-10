@@ -217,6 +217,7 @@ class Kafka(Service):
         image: str = "confluentinc/cp-kafka",
         tag: str = DEFAULT_CONFLUENT_PLATFORM_VERSION,
         port: int = 9092,
+        allow_host_ports: bool = False,
         auto_create_topics: bool = False,
         broker_id: int = 1,
         offsets_topic_replication_factor: int = 1,
@@ -230,6 +231,7 @@ class Kafka(Service):
             "KAFKA_REPLICA_FETCH_MAX_BYTES=15728640",
             "KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=100",
         ],
+        environment_extra: List[str] = [],
         depends_on: List[str] = ["zookeeper"],
         volumes: List[str] = [],
         listener_type: str = "PLAINTEXT",
@@ -238,10 +240,12 @@ class Kafka(Service):
             *environment,
             f"KAFKA_ADVERTISED_LISTENERS={listener_type}://{name}:{port}",
             f"KAFKA_BROKER_ID={broker_id}",
+            *environment_extra,
         ]
         config: ServiceConfig = {
             "image": f"{image}:{tag}",
             "ports": [port],
+            "allow_host_ports": allow_host_ports,
             "environment": [
                 *environment,
                 f"KAFKA_AUTO_CREATE_TOPICS_ENABLE={auto_create_topics}",

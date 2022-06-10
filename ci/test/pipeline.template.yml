@@ -113,15 +113,14 @@ steps:
 
   - id: cargo-test
     label: Cargo test
-    depends_on: build-x86_64
     timeout_in_minutes: 30
-    artifact_paths: junit_cargo-test_*.xml
+    artifact_paths: target/nextest/default/junit_cargo-test.xml
     plugins:
       - ./ci/plugins/scratch-aws-access: ~
       - ./ci/plugins/mzcompose:
           composition: cargo-test
     agents:
-      queue: linux-x86_64
+      queue: builder-linux-x86_64
 
   - id: miri-test
     label: Miri test
