@@ -71,7 +71,7 @@ impl Action for VerifySlotAction {
                     if active_pid.is_none() {
                         bail!("expected slot {} to be active, is inactive", &self.slot);
                     }
-                } else if rows.len() != 0 {
+                } else if !rows.is_empty() {
                     bail!("expected slot {} to be inactive, is active", &self.slot);
                 }
                 Ok(())

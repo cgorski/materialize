@@ -155,7 +155,7 @@ impl Action for SqlAction {
         use Statement::*;
 
         let query = &self.cmd.query;
-        print_query(&query);
+        print_query(query);
 
         let should_retry = match &self.stmt {
             // Do not retry FETCH statements as subsequent executions are likely
@@ -182,7 +182,7 @@ impl Action for SqlAction {
             false => Retry::default().max_duration(state.timeout).max_tries(1),
         }
         .retry_async_canceling(|retry_state| async move {
-            match self.try_redo(state, &query).await {
+            match self.try_redo(state, query).await {
                 Ok(()) => {
                     if retry_state.i != 0 {
                         println!();
@@ -260,7 +260,7 @@ impl SqlAction {
         pgclient: &mut tokio_postgres::Client,
         query: &str,
     ) -> Result<(), anyhow::Error> {
-        print_query(&query);
+        print_query(query);
         pgclient.query(query, &[]).await?;
         Ok(())
     }
@@ -437,7 +437,7 @@ impl Action for FailSqlAction {
         use Statement::{Commit, Rollback};
 
         let query = &self.query;
-        print_query(&query);
+        print_query(query);
 
         let should_retry = match &self.stmt {
             // Do not retry statements that could not be parsed
@@ -458,7 +458,7 @@ impl Action for FailSqlAction {
                 .max_tries(state.max_tries),
             false => Retry::default().max_duration(state.timeout).max_tries(1),
         }.retry_async_canceling(|retry_state| async move {
-            match self.try_redo(state, &query).await {
+            match self.try_redo(state, query).await {
                 Ok(()) => {
                     if retry_state.i != 0 {
                         println!();
@@ -579,7 +579,7 @@ pub fn decode_row(state: &State, row: Row) -> Result<Vec<String>, anyhow::Error>
                 .get::<_, Option<Array<ArrayElement<String>>>>(i)
                 .map(|a| a.to_string()),
             Type::BYTEA => row.get::<_, Option<Vec<u8>>>(i).map(|x| {
-                let s = x.into_iter().map(ascii::escape_default).flatten().collect();
+                let s = x.into_iter().flat_map(ascii::escape_default).collect();
                 String::from_utf8(s).unwrap()
             }),
             Type::CHAR => row.get::<_, Option<i8>>(i).map(|x| x.to_string()),

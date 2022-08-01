@@ -642,7 +642,7 @@ pub(crate) async fn build(
                 sql.expected_error = match &sql.expected_error {
                     SqlExpectedError::Contains(s) => SqlExpectedError::Contains(subst(s)?),
                     SqlExpectedError::Exact(s) => SqlExpectedError::Exact(subst(s)?),
-                    SqlExpectedError::Regex(s) => SqlExpectedError::Regex(subst_re(&s)?),
+                    SqlExpectedError::Regex(s) => SqlExpectedError::Regex(subst_re(s)?),
                     SqlExpectedError::Timeout => SqlExpectedError::Timeout,
                 };
                 Box::new(sql::build_fail_sql(sql).map_err(wrap_err)?)

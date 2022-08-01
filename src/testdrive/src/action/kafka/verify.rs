@@ -58,7 +58,7 @@ pub fn build_verify(mut cmd: BuiltinCommand) -> Result<VerifyAction, anyhow::Err
 
     let sort_messages = cmd.args.opt_bool("sort-messages")?.unwrap_or(false);
     let expected_messages = cmd.input;
-    if expected_messages.len() == 0 {
+    if expected_messages.is_empty() {
         // verify with 0 messages doesn't check that no messages have been written -
         // it 'verifies' 0 messages and trivially returns true
         bail!("kafka-verify requires a non-empty list of expected messages");
@@ -164,8 +164,8 @@ impl Action for VerifyAction {
                         .store_offset_from_message(&message)
                         .context("storing message offset")?;
                     actual_bytes.push((
-                        message.key().and_then(|bytes| Some(bytes.to_owned())),
-                        message.payload().and_then(|bytes| Some(bytes.to_owned())),
+                        message.key().map(|bytes| bytes.to_owned()),
+                        message.payload().map(|bytes| bytes.to_owned()),
                     ));
                 }
                 Some(Err(e)) => {

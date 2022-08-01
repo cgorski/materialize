@@ -116,7 +116,7 @@ impl Transcoder {
                         out.write_u8(0).unwrap();
                         out.write_i32::<NetworkEndian>(*schema_id).unwrap();
                     }
-                    out.extend(avro::to_avro_datum(&schema, val)?);
+                    out.extend(avro::to_avro_datum(schema, val)?);
                     Ok(Some(out))
                 } else {
                     Ok(None)
@@ -308,7 +308,7 @@ impl Action for IngestAction {
 
             for subject in stale_subjects {
                 println!("Deleting stale schema registry subject {}", subject);
-                match state.ccsr_client.delete_subject(&subject).await {
+                match state.ccsr_client.delete_subject(subject).await {
                     Ok(()) | Err(mz_ccsr::DeleteError::SubjectNotFound) => (),
                     Err(e) => return Err(e.into()),
                 }
